@@ -1,0 +1,10 @@
+CREATE TABLE topicos (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    titulo VARCHAR(150) NOT NULL,
+    mensaje TEXT NOT NULL,
+    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(50) NOT NULL DEFAULT 'NO_RESPONDIDO',
+    curso VARCHAR(100) NOT NULL,
+    usuario_id BIGINT NOT NULL,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+);
