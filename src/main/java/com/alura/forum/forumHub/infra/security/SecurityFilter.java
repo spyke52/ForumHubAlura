@@ -28,7 +28,6 @@ public class SecurityFilter extends OncePerRequestFilter {
 
         var authHeader = request.getHeader("Authorization");
         if (authHeader != null) {
-            // Manejar "Bearer" en cualquier combinación de mayúsculas/minúsculas
             String token = authHeader.replaceAll("(?i)bearer ", "").trim();
 
             if (!token.isEmpty()) {
@@ -40,8 +39,7 @@ public class SecurityFilter extends OncePerRequestFilter {
                                 usuario, null, usuario.getAuthorities());
                         SecurityContextHolder.getContext().setAuthentication(authentication);
                     }
-                } catch (RuntimeException e) {
-                    // Registrar error y responder con 401
+                } catch (Exception e) {
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token inválido o expirado");
                     return;
                 }

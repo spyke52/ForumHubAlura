@@ -1,10 +1,10 @@
-CREATE TABLE topicos (
+CREATE TABLE respuestas (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    titulo VARCHAR(150) NOT NULL,
     mensaje TEXT NOT NULL,
     fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-    status VARCHAR(20) NOT NULL DEFAULT 'NO_RESPONDIDO',
-    curso VARCHAR(100) NOT NULL,
+    solucion BOOLEAN DEFAULT FALSE,
+    topico_id BIGINT NOT NULL,
     usuario_id BIGINT NOT NULL,
+    FOREIGN KEY (topico_id) REFERENCES topicos(id) ON DELETE CASCADE,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
 );

@@ -2,11 +2,9 @@ package com.alura.forum.forumHub.infra.security;
 
 import com.alura.forum.forumHub.domain.usuario.Usuario;
 import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -18,17 +16,21 @@ import java.time.ZoneOffset;
 @Service
 public class TokenService {
 
-    @Value("${api.security.token.secret}")
-    private String secret;
+    private final String secret;
+
+    public TokenService(@Value("${JWT_SECRET}") String secret) {
+        this.secret = secret;
+    }
 
     public String generarToken(Usuario usuario) {
         try {
-            var algoritmo = Algorithm.HMAC256(secret.getBytes(StandardCharsets.UTF_8));
+            Algorithm algorithm = Algorithm.HMAC256(secret.getBytes(StandardCharsets.UTF_8));
             return JWT.create()
                     .withIssuer("API ForoHub")
                     .withSubject(usuario.getLogin())
                     .withExpiresAt(fechaExpiracion())
-                    .sign(algoritmo);
+                    .withClaim("rol", usuario.getRol().name())
+                    .sign(algorithm);
         } catch (JWTCreationException exception) {
             throw new RuntimeException("Error al generar el token JWT", exception);
         }
@@ -36,11 +38,11 @@ public class TokenService {
 
     public String getSubject(String token) {
         try {
-            var algoritmo = Algorithm.HMAC256(secret.getBytes(StandardCharsets.UTF_8));
-            JWTVerifier verifier = JWT.require(algoritmo)
+            Algorithm algorithm = Algorithm.HMAC256(secret.getBytes(StandardCharsets.UTF_8));
+            var verifier = JWT.require(algorithm)
                     .withIssuer("API ForoHub")
                     .build();
-            DecodedJWT jwt = verifier.verify(token);
+            var jwt = verifier.verify(token);
             return jwt.getSubject();
         } catch (JWTVerificationException exception) {
             throw new RuntimeException("Token JWT inválido: " + exception.getMessage());
@@ -48,7 +50,6 @@ public class TokenService {
     }
 
     private Instant fechaExpiracion() {
-        // Zona horaria de Argentina (UTC-3)
         return LocalDateTime.now()
                 .plusHours(2)
                 .toInstant(ZoneOffset.ofHours(-3));

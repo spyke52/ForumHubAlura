@@ -1,7 +1,15 @@
 package com.alura.forum.forumHub.domain.usuario;
 
-public record DatosDetalleUsuario(Long id, String login) {
+public record DatosDetalleUsuario(
+        Long id,
+        String login,
+        Rol rol
+) {
     public DatosDetalleUsuario(Usuario usuario) {
-        this(usuario.getId(), usuario.getLogin());
+        this(
+                usuario.getId(),
+                usuario.getLogin(),
+                usuario.getRol()
+        );
     }
 }
