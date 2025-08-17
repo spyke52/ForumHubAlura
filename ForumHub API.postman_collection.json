@@ -1,0 +1,853 @@
+{
+	"info": {
+		"_postman_id": "26a94417-1c65-488f-9cee-5425901d9650",
+		"name": "ForumHub API",
+		"description": "API REST para el foro de discusión ForumHub - Alura Challenge",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45203892",
+		"_collection_link": "https://franco-5120343.postman.co/workspace/franco's-Workspace~18f94c1b-ec6c-4db7-8953-df3f610a9099/collection/45203892-26a94417-1c65-488f-9cee-5425901d9650?action=share&source=collection_link&creator=45203892"
+	},
+	"item": [
+		{
+			"name": "1. Autenticación",
+			"item": [
+				{
+					"name": "Registrar Usuario",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response has user data\", function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('login');",
+									"    pm.expect(responseJson).to.have.property('rol');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"login\": \"testuser\",\n    \"clave\": \"TestPassword123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/usuarios",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"usuarios"
+							]
+						},
+						"description": "Registra un nuevo usuario en el sistema"
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Obtener JWT",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Token is present\", function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.jwTtoken).to.not.be.undefined;",
+									"    pm.expect(responseJson.jwTtoken).to.not.be.empty;",
+									"    ",
+									"    // Guardar el token en la variable de entorno",
+									"    pm.collectionVariables.set('jwt_token', responseJson.jwTtoken);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"login\": \"testuser\",\n    \"clave\": \"TestPassword123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"login"
+							]
+						},
+						"description": "Autentica usuario y obtiene JWT token"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Gestión de Tópicos",
+			"item": [
+				{
+					"name": "Crear Tópico",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response has topico data\", function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('titulo');",
+									"    pm.expect(responseJson).to.have.property('mensaje');",
+									"    pm.expect(responseJson).to.have.property('curso');",
+									"    ",
+									"    // Guardar ID del tópico para usar en otros requests",
+									"    pm.collectionVariables.set('topico_id', responseJson.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"titulo\": \"Mi primer tópico de Spring Boot\",\n    \"mensaje\": \"Tengo una duda sobre cómo configurar Spring Security con JWT. ¿Podrían ayudarme?\",\n    \"curso\": \"Spring Boot\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/topicos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"topicos"
+							]
+						},
+						"description": "Crea un nuevo tópico en el foro"
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Todos los Tópicos",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has pagination data\", function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('content');",
+									"    pm.expect(responseJson).to.have.property('totalElements');",
+									"    pm.expect(responseJson).to.have.property('totalPages');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/topicos?page=0&size=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"topicos"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Lista todos los tópicos con paginación"
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Tópico por ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has topico details\", function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('titulo');",
+									"    pm.expect(responseJson).to.have.property('mensaje');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/topicos/{{topico_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"topicos",
+								"{{topico_id}}"
+							]
+						},
+						"description": "Obtiene los detalles de un tópico específico"
+					},
+					"response": []
+				},
+				{
+					"name": "Actualizar Tópico",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Topico was updated\", function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.titulo).to.include('ACTUALIZADO');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": {{topico_id}},\n    \"titulo\": \"ACTUALIZADO - Mi primer tópico de Spring Boot\",\n    \"mensaje\": \"He actualizado mi pregunta sobre Spring Security con JWT. ¿Podrían ayudarme con ejemplos prácticos?\",\n    \"status\": \"NO_SOLUCIONADO\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/topicos/{{topico_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"topicos",
+								"{{topico_id}}"
+							]
+						},
+						"description": "Actualiza un tópico existente"
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Tópicos con Filtros",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has pagination\", function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('content');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/topicos/buscar?curso=Spring Boot&estado=NO_SOLUCIONADO&page=0&size=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"topicos",
+								"buscar"
+							],
+							"query": [
+								{
+									"key": "curso",
+									"value": "Spring Boot"
+								},
+								{
+									"key": "estado",
+									"value": "NO_SOLUCIONADO"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Busca tópicos con filtros avanzados"
+					},
+					"response": []
+				}
+			],
+			"description": "Operaciones CRUD para tópicos"
+		},
+		{
+			"name": "3. Gestión de Respuestas",
+			"item": [
+				{
+					"name": "Crear Respuesta",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response has respuesta data\", function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('mensaje');",
+									"    pm.expect(responseJson).to.have.property('autor');",
+									"    ",
+									"    // Guardar ID de la respuesta",
+									"    pm.collectionVariables.set('respuesta_id', responseJson.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"mensaje\": \"Para configurar Spring Security con JWT, necesitas crear una clase de configuración que extienda WebSecurityConfigurerAdapter. También necesitarás un filtro personalizado para validar los tokens.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/topicos/{{topico_id}}/respuestas",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"topicos",
+								"{{topico_id}}",
+								"respuestas"
+							]
+						},
+						"description": "Agrega una respuesta a un tópico"
+					},
+					"response": []
+				},
+				{
+					"name": "Marcar Respuesta como Solución",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Respuesta marcada como solucion\", function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.solucion).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/topicos/{{topico_id}}/respuestas/{{respuesta_id}}/solucion",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"topicos",
+								"{{topico_id}}",
+								"respuestas",
+								"{{respuesta_id}}",
+								"solucion"
+							]
+						},
+						"description": "Marca una respuesta como solución al tópico"
+					},
+					"response": []
+				}
+			],
+			"description": "Operaciones para respuestas"
+		},
+		{
+			"name": "4. Búsqueda y Estadísticas",
+			"item": [
+				{
+					"name": "Búsqueda Full-Text",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is array\", function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/search?q=Spring Security&page=0&size=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"search"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "Spring Security"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Búsqueda de texto completo en tópicos"
+					},
+					"response": []
+				},
+				{
+					"name": "Dashboard - Estadísticas",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has statistics\", function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('totalTopicos');",
+									"    pm.expect(responseJson).to.have.property('topicosSolucionados');",
+									"    pm.expect(responseJson).to.have.property('totalRespuestas');",
+									"    pm.expect(responseJson).to.have.property('totalUsuarios');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/stats/dashboard",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"stats",
+								"dashboard"
+							]
+						},
+						"description": "Obtiene estadísticas del dashboard"
+					},
+					"response": []
+				},
+				{
+					"name": "Tópicos Trending",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is array\", function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/stats/trending",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"stats",
+								"trending"
+							]
+						},
+						"description": "Obtiene los tópicos más populares/trending"
+					},
+					"response": []
+				}
+			],
+			"description": "Búsquedas y estadísticas del foro"
+		},
+		{
+			"name": "5. Administración (Solo ADMIN)",
+			"item": [
+				{
+					"name": "Actualizar Rol de Usuario",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 or 403\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 403]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"User role was updated\", function () {",
+									"        const responseJson = pm.response.json();",
+									"        pm.expect(responseJson).to.have.property('rol');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"rol\": \"MODERADOR\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/usuarios/1/rol",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"usuarios",
+								"1",
+								"rol"
+							]
+						},
+						"description": "Actualiza el rol de un usuario (requiere rol ADMIN)"
+					},
+					"response": []
+				}
+			],
+			"description": "Operaciones administrativas"
+		},
+		{
+			"name": "6. Casos de Error",
+			"item": [
+				{
+					"name": "Error 401 - Sin Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/topicos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"topicos"
+							]
+						},
+						"description": "Intenta acceder a un endpoint protegido sin token"
+					},
+					"response": []
+				},
+				{
+					"name": "Error 400 - Datos Inválidos",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"titulo\": \"\",\n    \"mensaje\": \"\",\n    \"curso\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/topicos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"topicos"
+							]
+						},
+						"description": "Intenta crear un tópico con datos vacíos"
+					},
+					"response": []
+				},
+				{
+					"name": "Error 404 - Recurso No Encontrado",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/topicos/99999",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"topicos",
+								"99999"
+							]
+						},
+						"description": "Intenta obtener un tópico que no existe"
+					},
+					"response": []
+				}
+			],
+			"description": "Pruebas de manejo de errores"
+		},
+		{
+			"name": "7. Cleanup - Eliminar Tópico",
+			"item": [
+				{
+					"name": "Eliminar Tópico",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204\", function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/topicos/{{topico_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"topicos",
+								"{{topico_id}}"
+							]
+						},
+						"description": "Elimina el tópico creado (limpieza)"
+					},
+					"response": []
+				}
+			],
+			"description": "Limpieza de datos de prueba"
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{jwt_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "topico_id",
+			"value": ""
+		},
+		{
+			"key": "respuesta_id",
+			"value": ""
+		}
+	]
+}
